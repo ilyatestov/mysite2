@@ -68,9 +68,13 @@ app.use('*', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/health`);
-});
-
+// Экспортируем app для тестирования
 module.exports = app;
+
+// Запуск сервера только если файл запущен напрямую (не импортирован)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+    console.log(`Health check: http://localhost:${PORT}/health`);
+  });
+}

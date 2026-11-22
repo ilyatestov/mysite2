@@ -1,7 +1,19 @@
 const request = require('supertest');
 const app = require('../src/server');
 
+// Создаем уникальный порт для тестов
+const TEST_PORT = 3001;
+
+// Запускаем тестовый сервер на другом порту
+const server = app.listen(TEST_PORT, () => {
+  console.log(`Test server running on port ${TEST_PORT}`);
+});
+
 describe('Auth API Tests', () => {
+  afterAll((done) => {
+    server.close(done);
+  });
+
   test('should register a new user', async () => {
     const newUser = {
       username: 'testuser',
