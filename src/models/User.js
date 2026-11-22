@@ -79,7 +79,7 @@ const User = sequelize.define('User', {
     type: DataTypes.INTEGER,
     allowNull: true,
     references: {
-      model: User,
+      model: 'Users', // Используем строку вместо прямой ссылки
       key: 'id'
     }
   }

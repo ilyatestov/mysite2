@@ -1,10 +1,34 @@
 const Message = require('../models/Message');
 const User = require('../models/User');
+const { Op } = require('sequelize');
 
-// GET /messages - получить все сообщения
+// GET /messages - получить все сообщения (для владельца или админа)
 const getAllMessages = async (req, res) => {
   try {
-    const messages = await Message.findAll();
+    let messages;
+    if (req.user.role === 'admin') {
+      // Администратор видит все сообщения
+      messages = await Message.findAll({
+        include: [
+          { model: User, as: 'sender' },
+          { model: User, as: 'receiver' }
+        ]
+      });
+    } else {
+      // Пользователь видит только свои сообщения
+      messages = await Message.findAll({
+        where: {
+          [Op.or]: [
+            { senderId: req.user.id },
+            { receiverId: req.user.id }
+          ]
+        },
+        include: [
+          { model: User, as: 'sender' },
+          { model: User, as: 'receiver' }
+        ]
+      });
+    }
     res.json(messages);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch messages' });
@@ -14,13 +38,21 @@ const getAllMessages = async (req, res) => {
 // GET /messages/:id - получить сообщение по ID
 const getMessageById = async (req, res) => {
   try {
-    const message = await Message.findByPk(req.params.id);
+    const message = await Message.findByPk(req.params.id, {
+      include: [
+        { model: User, as: 'sender' },
+        { model: User, as: 'receiver' }
+      ]
+    });
+    
     if (!message) {
       return res.status(404).json({ error: 'Message not found' });
     }
     
-    // Проверка доступа к сообщению
-    if (message.senderId !== req.user.id && message.receiverId !== req.user.id && req.user.role !== 'admin') {
+    // Проверка прав доступа
+    if (message.senderId !== req.user.id && 
+        message.receiverId !== req.user.id && 
+        req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Access denied. Not message sender or receiver.' });
     }
     
@@ -35,27 +67,23 @@ const createMessage = async (req, res) => {
   try {
     const { senderId, receiverId, content } = req.body;
     
-    if (!senderId || !receiverId || !content) {
-      return res.status(400).json({ error: 'SenderId, receiverId and content are required' });
-    }
-    
-    // Проверка существования пользователей
-    const senderExists = await User.findByPk(senderId);
-    if (!senderExists) {
-      return res.status(400).json({ error: 'Sender not found' });
-    }
-    
-    const receiverExists = await User.findByPk(receiverId);
-    if (!receiverExists) {
-      return res.status(400).json({ error: 'Receiver not found' });
-    }
-    
-    // Проверка доступа к отправке сообщения
+    // Проверка прав доступа - только отправитель может создавать сообщения
     if (senderId !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Access denied. Not message sender.' });
     }
     
-    const message = await Message.create(req.body);
+    // Проверка существования получателя
+    const receiver = await User.findByPk(receiverId);
+    if (!receiver) {
+      return res.status(400).json({ error: 'Receiver not found' });
+    }
+    
+    const message = await Message.create({
+      senderId,
+      receiverId,
+      content
+    });
+    
     res.status(201).json(message);
   } catch (error) {
     res.status(400).json({ error: 'Failed to create message', details: error.message });
@@ -70,12 +98,19 @@ const updateMessage = async (req, res) => {
       return res.status(404).json({ error: 'Message not found' });
     }
     
-    // Проверка доступа к сообщению
+    // Проверка прав доступа - только отправитель может обновлять сообщения
     if (message.senderId !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Access denied. Not message sender.' });
     }
     
-    await message.update(req.body);
+    // Защита от массового присвоения полей
+    const { content, isRead } = req.body;
+    const updateData = {};
+    
+    if (content !== undefined) updateData.content = content;
+    if (isRead !== undefined) updateData.isRead = isRead;
+    
+    await message.update(updateData);
     res.json(message);
   } catch (error) {
     res.status(400).json({ error: 'Failed to update message', details: error.message });
@@ -90,9 +125,11 @@ const deleteMessage = async (req, res) => {
       return res.status(404).json({ error: 'Message not found' });
     }
     
-    // Проверка доступа к сообщению
-    if (message.senderId !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Access denied. Not message sender.' });
+    // Проверка прав доступа - только отправитель или получатель могут удалять
+    if (message.senderId !== req.user.id && 
+        message.receiverId !== req.user.id && 
+        req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied. Not message sender or receiver.' });
     }
     
     await message.destroy();
@@ -102,79 +139,10 @@ const deleteMessage = async (req, res) => {
   }
 };
 
-// GET /messages/user/:userId - получить все сообщения пользователя
-const getMessagesByUser = async (req, res) => {
-  try {
-    const messages = await Message.findAll({
-      where: { 
-        $or: [
-          { senderId: req.params.userId },
-          { receiverId: req.params.userId }
-        ]
-      },
-      include: [
-        { model: User, as: 'sender' },
-        { model: User, as: 'receiver' }
-      ],
-      order: [['createdAt', 'DESC']]
-    });
-    
-    res.json(messages);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch messages for user' });
-  }
-};
-
-// GET /messages/conversation/:senderId/:receiverId - получить диалог между пользователями
-const getConversation = async (req, res) => {
-  try {
-    const messages = await Message.findAll({
-      where: { 
-        $and: [
-          { senderId: req.params.senderId },
-          { receiverId: req.params.receiverId }
-        ]
-      },
-      include: [
-        { model: User, as: 'sender' },
-        { model: User, as: 'receiver' }
-      ],
-      order: [['createdAt', 'DESC']]
-    });
-    
-    res.json(messages);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch conversation' });
-  }
-};
-
-// PUT /messages/:id/read - отметить сообщение как прочитанное
-const markAsRead = async (req, res) => {
-  try {
-    const message = await Message.findByPk(req.params.id);
-    if (!message) {
-      return res.status(404).json({ error: 'Message not found' });
-    }
-    
-    // Проверка доступа к сообщению
-    if (message.receiverId !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Access denied. Not message receiver.' });
-    }
-    
-    await message.update({ isRead: true });
-    res.json(message);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to mark message as read' });
-  }
-};
-
 module.exports = {
   getAllMessages,
   getMessageById,
   createMessage,
   updateMessage,
-  deleteMessage,
-  getMessagesByUser,
-  getConversation,
-  markAsRead
+  deleteMessage
 };
