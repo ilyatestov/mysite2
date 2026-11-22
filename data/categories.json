@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "name": "Общие",
+    "slug": "obshie",
+    "description": "Общая категория для всех постов",
+    "parentId": null,
+    "sortOrder": 0,
+    "isActive": true
+  },
+  {
+    "id": 2,
+    "name": "Технологии",
+    "slug": "tehnologii",
+    "description": "Категория по технологиям",
+    "parentId": null,
+    "sortOrder": 1,
+    "isActive": true
+  }
+]

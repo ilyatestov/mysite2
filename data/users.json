@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "username": "admin",
+    "email": "admin@example.com",
+    "password": "$2b$10$8Kq3j5p6G9V4r7dS5xT2oOuHk2vN5sF2uW4zX7nJ8yB1cD9eR4fA8g",
+    "firstName": "Admin",
+    "lastName": "User",
+    "role": "admin",
+    "isActive": true,
+    "avatar": null,
+    "bio": "Administrator of MySite2",
+    "referralCode": "ADMIN01",
+    "referredBy": null
+  },
+  {
+    "id": 2,
+    "username": "user1",
+    "email": "user1@example.com",
+    "password": "$2b$10$8Kq3j5p6G9V4r7dS5xT2oOuHk2vN5sF2uW4zX7nJ8yB1cD9eR4fA8g",
+    "firstName": "John",
+    "lastName": "Doe",
+    "role": "user",
+    "isActive": true,
+    "avatar": null,
+    "bio": "Regular user of MySite2",
+    "referralCode": "USER01",
+    "referredBy": 1
+  },
+  {
+    "id": 3,
+    "username": "moderator",
+    "email": "mod@example.com",
+    "password": "$2b$10$8Kq3j5p6G9V4r7dS5xT2oOuHk2vN5sF2uW4zX7nJ8yB1cD9eR4fA8g",
+    "firstName": "Moderator",
+    "lastName": "User",
+    "role": "moderator",
+    "isActive": true,
+    "avatar": null,
+    "bio": "Content moderator of MySite2",
+    "referralCode": "MOD01",
+    "referredBy": 1
+  }
+]

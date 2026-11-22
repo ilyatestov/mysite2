@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "name": "Node.js",
+    "slug": "nodejs",
+    "description": "Тег для Node.js технологий",
+    "isActive": true
+  },
+  {
+    "id": 2,
+    "name": "Express",
+    "slug": "express",
+    "description": "Тег для Express фреймворка",
+    "isActive": true
+  }
+]
