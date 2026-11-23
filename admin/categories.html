@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление категориями - MySite2</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <h1>Панель управления MySite2</h1>
+            <nav class="admin-nav">
+                <a href="/admin/dashboard">Главная</a>
+                <a href="/admin/users">Пользователи</a>
+                <a href="/admin/posts">Посты</a>
+                <a href="/admin/categories" class="active">Категории</a>
+                <a href="/admin/messages">Сообщения</a>
+                <a href="/admin/referrals">Рефералы</a>
+                <a href="/admin/logs">Логи</a>
+            </nav>
+        </header>
+
+        <main class="admin-main">
+            <h2>Управление категориями</h2>
+            
+            <div class="admin-form">
+                <h3>Добавить новую категорию</h3>
+                <form id="category-form">
+                    <input type="text" id="category-name" placeholder="Название категории" required>
+                    <textarea id="category-description" placeholder="Описание категории"></textarea>
+                    <button type="submit">Создать категорию</button>
+                </form>
+            </div>
+
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Описание</th>
+                            <th>Количество постов</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categories-table-body">
+                        <!-- Данные будут добавлены через JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="admin-pagination">
+                <button>Предыдущая</button>
+                <span>1 / 1</span>
+                <button>Следующая</button>
+            </div>
+        </main>
+             </div>
+         </main>
+
+         <script>
+             // Пример данных для демонстрации
+             const sampleCategories = [
+                 { id: 1, name: 'Технологии', description: 'Технологические новости и разработки', postCount: 120 },
+                 { id: 2, name: 'Новости', description: 'Актуальные новости', postCount: 85 },
+                 { id: 3, name: 'Культура', description: 'Культурные события и традиции', postCount: 45 }
+             ];
+
+             function loadCategories() {
+                 const tableBody = document.getElementById('categories-table-body');
+                 tableBody.innerHTML = '';
+                 
+                 sampleCategories.forEach(category => {
+                     const row = document.createElement('tr');
+                     row.innerHTML = `
+                         <td>${category.id}</td>
+                         <td>${category.name}</td>
+                         <td>${category.description}</td>
+                         <td>${category.postCount}</td>
+                         <td>
+                             <button onclick="editCategory(${category.id})">Редактировать</button>
+                             <button onclick="deleteCategory(${category.id})">Удалить</button>
+                         </td>
+                     `;
+                     tableBody.appendChild(row);
+                 });
+             }
+
+             function addCategory(event) {
+                 event.preventDefault();
+                 const name = document.getElementById('category-name').value;
+                 const description = document.getElementById('category-description').value;
+                 
+                 if (name) {
+                     alert(`Создана новая категория: ${name}`);
+                     document.getElementById('category-form').reset();
+                 }
+             }
+
+             function editCategory(id) {
+                 alert(`Редактирование категории с ID: ${id}`);
+             }
+
+             function deleteCategory(id) {
+                 if (confirm('Вы уверены, что хотите удалить эту категорию?')) {
+                     alert(`Категория с ID: ${id} удалена`);
+                 }
+             }
+
+             // Загрузка данных при загрузке страницы и обработка формы
+             window.onload = function() {
+                 loadCategories();
+                 document.getElementById('category-form').addEventListener('submit', addCategory);
+             };
+         </script>

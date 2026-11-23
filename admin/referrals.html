@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление рефералами - MySite2</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <h1>Панель управления MySite2</h1>
+            <nav class="admin-nav">
+                <a href="/admin/dashboard">Главная</a>
+                <a href="/admin/users">Пользователи</a>
+                <a href="/admin/posts">Посты</a>
+                <a href="/admin/categories">Категории</a>
+                <a href="/admin/messages">Сообщения</a>
+                <a href="/admin/referrals" class="active">Рефералы</a>
+                <a href="/admin/logs">Логи</a>
+            </nav>
+        </header>
+
+        <main class="admin-main">
+            <h2>Управление рефералами</h2>
+            
+            <div class="admin-filters">
+                <input type="text" id="search-referrals" placeholder="Поиск рефералов...">
+                <select id="status-filter">
+                    <option value="">Все статусы</option>
+                    <option value="active">Активные</option>
+                    <option value="inactive">Неактивные</option>
+                </select>
+                <button onclick="filterReferrals()">Фильтровать</button>
+            </div>
+
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Реферальный код</th>
+                            <th>Реферер</th>
+                            <th>Реферал</th>
+                            <th>Статус</th>
+                            <th>Дата регистрации</th>
+                            <th>Бонусы</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="referrals-table-body">
+                        <!-- Данные будут добавлены через JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="admin-pagination">
+                <button>Предыдущая</button>
+                <span>1 / 1</span>
+                <button>Следующая</button>
+            </div>
+        </main>
+
+        <script>
+            // Пример данных для демонстрации
+            const sampleReferrals = [
+                { id: 1, referralCode: 'REF001', referrer: 'admin_user', referee: 'regular_user', status: 'active', registrationDate: '2023-01-15', bonuses: 100 },
+                { id: 2, referralCode: 'REF002', referrer: 'moderator_user', referee: 'regular_user2', status: 'active', registrationDate: '2023-02-20', bonuses: 50 },
+                { id: 3, referralCode: 'REF003', referrer: 'regular_user', referee: 'regular_user3', status: 'inactive', registrationDate: '2023-03-10', bonuses: 0 }
+            ];
+
+            function loadReferrals() {
+                const tableBody = document.getElementById('referrals-table-body');
+                tableBody.innerHTML = '';
+                
+                sampleReferrals.forEach(referral => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${referral.id}</td>
+                        <td>${referral.referralCode}</td>
+                        <td>${referral.referrer}</td>
+                        <td>${referral.referee}</td>
+                        <td>${getStatusBadge(referral.status)}</td>
+                        <td>${referral.registrationDate}</td>
+                        <td>${referral.bonuses} баллов</td>
+                        <td>
+                            <button onclick="viewReferral(${referral.id})">Просмотреть</button>
+                            <button onclick="deleteReferral(${referral.id})">Удалить</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            function getStatusBadge(status) {
+                let badgeClass, statusText;
+                switch(status) {
+                    case 'active':
+                        badgeClass = 'badge-success';
+                        statusText = 'Активен';
+                        break;
+                    case 'inactive':
+                        badgeClass = 'badge-danger';
+                        statusText = 'Неактивен';
+                        break;
+                    default:
+                        badgeClass = '';
+                        statusText = status;
+                }
+                return `<span class="badge ${badgeClass}">${statusText}</span>`;
+            }
+
+            function filterReferrals() {
+                // Логика фильтрации будет реализована в будущем
+                alert('Фильтрация рефералов');
+            }
+
+            function viewReferral(id) {
+                alert(`Просмотр реферала с ID: ${id}`);
+            }
+
+            function deleteReferral(id) {
+                if (confirm('Вы уверены, что хотите удалить этого реферала?')) {
+                    alert(`Реферал с ID: ${id} удален`);
+                }
+            }
+
+            // Загрузка данных при загрузке страницы
+            window.onload = loadReferrals;
+        </script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Логи действий - MySite2</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <h1>Панель управления MySite2</h1>
+            <nav class="admin-nav">
+                <a href="/admin/dashboard">Главная</a>
+                <a href="/admin/users">Пользователи</a>
+                <a href="/admin/posts">Посты</a>
+                <a href="/admin/categories">Категории</a>
+                <a href="/admin/messages">Сообщения</a>
+                <a href="/admin/referrals">Рефералы</a>
+                <a href="/admin/logs" class="active">Логи</a>
+            </nav>
+        </header>
+
+        <main class="admin-main">
+            <h2>Логи действий</h2>
+            
+            <div class="admin-filters">
+                <input type="text" id="search-logs" placeholder="Поиск по логам...">
+                <select id="level-filter">
+                    <option value="">Все уровни</option>
+                    <option value="info">Информация</option>
+                    <option value="warning">Предупреждение</option>
+                    <option value="error">Ошибка</option>
+                </select>
+                <button onclick="filterLogs()">Фильтровать</button>
+            </div>
+
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Уровень</th>
+                            <th>Сообщение</th>
+                            <th>Пользователь</th>
+                            <th>Дата</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logs-table-body">
+                        <!-- Данные будут добавлены через JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="admin-pagination">
+                <button>Предыдущая</button>
+                <span>1 / 1</span>
+                <button>Следующая</button>
+            </div>
+        </main>
+
+        <script>
+            // Пример данных для демонстрации
+            const sampleLogs = [
+                { id: 1, level: 'info', message: 'Пользователь вошел в систему', user: 'admin_user', date: '2023-01-15 10:30' },
+                { id: 2, level: 'warning', message: 'Попытка входа с неправильным паролем', user: 'regular_user', date: '2023-02-20 14:15' },
+                { id: 3, level: 'error', message: 'Ошибка при создании поста', user: 'moderator_user', date: '2023-03-10 09:45' }
+            ];
+
+            function loadLogs() {
+                const tableBody = document.getElementById('logs-table-body');
+                tableBody.innerHTML = '';
+                
+                sampleLogs.forEach(log => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${log.id}</td>
+                        <td>${getLevelBadge(log.level)}</td>
+                        <td>${log.message}</td>
+                        <td>${log.user}</td>
+                        <td>${log.date}</td>
+                        <td>
+                            <button onclick="viewLog(${log.id})">Просмотреть</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            function getLevelBadge(level) {
+                let badgeClass, levelText;
+                switch(level) {
+                    case 'info':
+                        badgeClass = 'badge-info';
+                        levelText = 'Информация';
+                        break;
+                    case 'warning':
+                        badgeClass = 'badge-warning';
+                        levelText = 'Предупреждение';
+                        break;
+                    case 'error':
+                        badgeClass = 'badge-danger';
+                        levelText = 'Ошибка';
+                        break;
+                    default:
+                        badgeClass = '';
+                        levelText = level;
+                }
+                return `<span class="badge ${badgeClass}">${levelText}</span>`;
+            }
+
+            function filterLogs() {
+                // Логика фильтрации будет реализована в будущем
+                alert('Фильтрация логов');
+            }
+
+            function viewLog(id) {
+                alert(`Просмотр лога с ID: ${id}`);
+            }
+
+            // Загрузка данных при загрузке страницы
+            window.onload = loadLogs;
+        </script>
+</body>
+</html>

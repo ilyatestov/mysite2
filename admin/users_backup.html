@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление пользователями - MySite2</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <h1>Панель управления MySite2</h1>
+            <nav class="admin-nav">
+                <a href="/admin/dashboard">Главная</a>
+                <a href="/admin/users" class="active">Пользователи</a>
+                <a href="/admin/posts">Посты</a>
+                <a href="/admin/categories">Категории</a>
+                <a href="/admin/messages">Сообщения</a>
+                <a href="/admin/referrals">Рефералы</a>
+                <a href="/admin/logs">Логи</a>
+            </nav>
+        </header>
+
+        <main class="admin-main">
+            <h2>Управление пользователями</h2>
+            
+            <div class="admin-filters">
+                <input type="text" id="search-users" placeholder="Поиск пользователей...">
+                <select id="role-filter">
+                    <option value="">Все роли</option>
+                    <option value="user">Пользователь</option>
+                    <option value="moderator">Модератор</option>
+                    <option value="admin">Администратор</option>
+                </select>
+                <button onclick="filterUsers()">Фильтровать</button>
+            </div>
+
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Имя пользователя</th>
+                            <th>Email</th>
+                            <th>Роль</th>
+                            <th>Статус</th>
+                            <th>Дата регистрации</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <!-- Данные будут добавлены через JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="admin-pagination">
+                <button>Предыдущая</button>
+                <span>1 / 1</span>
+                <button>Следующая</button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Пример данных для демонстрации
+        const sampleUsers = [
+            { id: 1, username: 'admin_user', email: 'admin@example.com', role: 'admin', status: 'active', registrationDate: '2023-01-15' },
+            { id: 2, username: 'moderator_user', email: 'mod@example.com', role: 'moderator', status: 'active', registrationDate: '2023-02-20' },
+            { id: 3, username: 'regular_user', email: 'user@example.com', role: 'user', status: 'active', registrationDate: '2023-03-10' }
+        ];
+
+        function loadUsers() {
+            const tableBody = document.getElementById('users-table-body');
+            tableBody.innerHTML = '';
+            
+            sampleUsers.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td>${getRoleName(user.role)}</td>
+                    <td>${getStatusBadge(user.status)}</td>
+                    <td>${user.registrationDate}</td>
+                    <td>
+                        <button onclick="editUser(${user.id})">Редактировать</button>
+                        <button onclick="deleteUser(${user.id})">Удалить</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function getRoleName(role) {
+            switch(role) {
+                case 'admin': return 'Администратор';
+                case 'moderator': return 'Модератор';
+                case 'user': return 'Пользователь';
+                default: return role;
+            }
+        }
+
+        function getStatusBadge(status) {
+            const statusClass = status === 'active' ? 'badge-success' : 'badge-danger';
+            const statusText = status === 'active' ? 'Активен' : 'Неактивен';
+            return `<span class="badge ${statusClass}">${statusText}</span>`;
+        }
+
+        function filterUsers() {
+            // Логика фильтрации будет реализована в будущем
+            alert('Фильтрация пользователей');
+        }
+
+        function editUser(id) {
+            alert(`Редактирование пользователя с ID: ${id}`);
+        }
+
+        function deleteUser(id) {
+            if (confirm('Вы уверены, что хотите удалить этого пользователя?')) {
+                alert(`Пользователь с ID: ${id} удален`);
+            }
+        }
+
+        // Загрузка данных при загрузке страницы
+        window.onload = loadUsers;
+    </script>
+</body>
+</html>

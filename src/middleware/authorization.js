@@ -1,26 +1,28 @@
 /**
  * Middleware для проверки ролей пользователя
- * @param {Array} roles - Массив разрешенных ролей
+ * @param {Array} roles - Массив разрешенных ролей. Если не указан, проверяет на наличие авторизации
  * @returns {Function} Middleware функция
  */
-const authorize = (roles = []) => {
+export const authorize = (roles = null) => {
   return (req, res, next) => {
-    // Проверка аутентификации
+    // Проверка наличия пользователя в запросе (должен быть установлен middleware auth)
     if (!req.user) {
-      return res.status(401).json({ 
-        error: 'Authentication required' 
+      return res.status(401).json({
+        success: false,
+        message: 'Необходима авторизация'
       });
     }
 
-    // Если не указаны роли, пропускаем
-    if (roles.length === 0) {
+    // Если роли не указаны, просто проверяем авторизацию
+    if (!roles || roles.length === 0) {
       return next();
     }
 
-    // Проверка роли пользователя
+    // Проверяем, есть ли у пользователя нужная роль
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ 
-        error: 'Access denied. Insufficient permissions.' 
+      return res.status(403).json({
+        success: false,
+        message: 'Недостаточно прав для выполнения операции'
       });
     }
 
@@ -32,24 +34,33 @@ const authorize = (roles = []) => {
  * Middleware для проверки принадлежности ресурса пользователю
  * @returns {Function} Middleware функция
  */
-const isOwner = () => {
+export const isOwner = () => {
   return (req, res, next) => {
-    // Проверка аутентификации
+    // Проверка наличия пользователя в запросе
     if (!req.user) {
-      return res.status(401).json({ 
-        error: 'Authentication required' 
+      return res.status(401).json({
+        success: false,
+        message: 'Необходима авторизация'
       });
     }
 
-    // Администраторы имеют полный доступ
+    // Проверка наличия ID ресурса в параметрах запроса
+    const resourceId = req.params.id;
+    if (!resourceId) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID ресурса не указан'
+      });
+    }
+
+    // Для администраторов всегда разрешен доступ
     if (req.user.role === 'admin') {
       return next();
     }
 
-    // Для других ролей проверяем принадлежность
-    // В реальной реализации здесь будет проверка в БД
-    
-    // Для демонстрации просто пропускаем
+    // В реальной реализации здесь будет проверка принадлежности ресурса пользователю
+    // Например, проверка в БД, что пользователь является владельцем ресурса
+    // В данном примере просто пропускаем запрос (в реальной системе нужно реализовать проверку)
     next();
   };
 };
@@ -59,48 +70,103 @@ const isOwner = () => {
  * @param {string} permission - Название права доступа
  * @returns {Function} Middleware функция
  */
-const checkPermission = (permission) => {
+export const checkPermission = (permission) => {
   return (req, res, next) => {
-    // Проверка аутентификации
+    // Проверка наличия пользователя в запросе
     if (!req.user) {
-      return res.status(401).json({ 
-        error: 'Authentication required' 
+      return res.status(401).json({
+        success: false,
+        message: 'Необходима авторизация'
       });
     }
 
-    // В реальной реализации здесь будет проверка конкретного права доступа
-    // Например, проверка, что у пользователя есть право на выполнение операции
+    // В реальной реализации здесь будет проверка наличия у пользователя конкретного права
+    // Например, проверка в БД или в конфигурации
+    // В данном примере просто пропускаем запрос (в реальной системе нужно реализовать проверку)
     
-    // Для демонстрации - всегда пропускаем
     next();
   };
 };
 
 /**
- * Middleware для валидации изменений ролей
+ * Middleware для валидации изменений ролей пользователей
  * @returns {Function} Middleware функция
  */
-const validateRoleChange = (req, res, next) => {
-  // Проверка аутентификации
-  if (!req.user) {
-    return res.status(401).json({ 
-      error: 'Authentication required' 
-    });
-  }
+export const validateRoleChange = () => {
+  return (req, res, next) => {
+    // Проверка наличия пользователя в запросе
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Необходима авторизация'
+      });
+    }
 
-  // Только администраторы могут изменять роли пользователей
-  if (req.body.role && req.user.role !== 'admin') {
-    return res.status(403).json({ 
-      error: 'Access denied. Only administrators can change user roles.' 
-    });
-  }
+    // Только администраторы могут изменять роли пользователей
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Недостаточно прав для изменения ролей пользователей'
+      });
+    }
 
-  next();
+    // В реальной реализации здесь будет дополнительная проверка:
+    // - Запрет на изменение собственной роли
+    // - Проверка допустимых ролей для изменения
+    // - Проверка на попытку повысить уровень до администратора
+    
+    next();
+  };
 };
 
-module.exports = {
-  authorize,
-  isOwner,
-  checkPermission,
-  validateRoleChange
+/**
+ * Middleware для проверки прав доступа к ресурсу на основе данных из БД
+ * @param {Function} model - Модель данных для проверки
+ * @param {string} ownerField - Поле в модели, содержащее ID владельца
+ * @returns {Function} Middleware функция
+ */
+export const checkResourceOwnership = (model, ownerField = 'userId') => {
+  return async (req, res, next) => {
+    // Проверка наличия пользователя в запросе
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Необходима авторизация'
+      });
+    }
+
+    // Проверка наличия ID ресурса в параметрах запроса
+    const resourceId = req.params.id;
+    if (!resourceId) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID ресурса не указан'
+      });
+    }
+
+    // Для администраторов всегда разрешен доступ
+    if (req.user.role === 'admin') {
+      return next();
+    }
+
+    try {
+      // В реальной реализации здесь будет запрос к БД для проверки принадлежности
+      // const resource = await model.findByPk(resourceId);
+      // if (!resource || resource[ownerField] !== req.user.id) {
+      //   return res.status(403).json({
+      //     success: false,
+      //     message: 'Нет доступа к ресурсу'
+      //   });
+      // }
+      
+      // В данном примере просто пропускаем запрос
+      next();
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: 'Ошибка проверки доступа к ресурсу',
+        error: error.message
+      });
+    }
+  };
 };

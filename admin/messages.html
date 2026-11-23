@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление сообщениями - MySite2</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <h1>Панель управления MySite2</h1>
+            <nav class="admin-nav">
+                <a href="/admin/dashboard">Главная</a>
+                <a href="/admin/users">Пользователи</a>
+                <a href="/admin/posts">Посты</a>
+                <a href="/admin/categories">Категории</a>
+                <a href="/admin/messages" class="active">Сообщения</a>
+                <a href="/admin/referrals">Рефералы</a>
+                <a href="/admin/logs">Логи</a>
+            </nav>
+        </header>
+
+        <main class="admin-main">
+            <h2>Управление сообщениями</h2>
+            
+            <div class="admin-filters">
+                <input type="text" id="search-messages" placeholder="Поиск сообщений...">
+                <select id="status-filter">
+                    <option value="">Все статусы</option>
+                    <option value="unread">Непрочитано</option>
+                    <option value="read">Прочитано</option>
+                    <option value="replied">Отвечено</option>
+                </select>
+                <button onclick="filterMessages()">Фильтровать</button>
+            </div>
+
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Отправитель</th>
+                            <th>Тема</th>
+                            <th>Сообщение</th>
+                            <th>Дата</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="messages-table-body">
+                        <!-- Данные будут добавлены через JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="admin-pagination">
+                <button>Предыдущая</button>
+                <span>1 / 1</span>
+                <button>Следующая</button>
+            </div>
+        </main>

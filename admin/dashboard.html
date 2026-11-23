@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель управления - MySite2</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <h1>Панель управления MySite2</h1>
+            <nav class="admin-nav">
+                <a href="/admin/dashboard" class="active">Главная</a>
+                <a href="/admin/users">Пользователи</a>
+                <a href="/admin/posts">Посты</a>
+                <a href="/admin/categories">Категории</a>
+                <a href="/admin/messages">Сообщения</a>
+                <a href="/admin/referrals">Рефералы</a>
+                <a href="/admin/logs">Логи</a>
+            </nav>
+        </header>
+
+        <main class="admin-main">
+            <h2>Добро пожаловать в панель управления</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Пользователи</h3>
+                    <p>1,245</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Посты</h3>
+                    <p>3,567</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Сообщения</h3>
+                    <p>8,921</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Рефералы</h3>
+                    <p>156</p>
+                </div>
+            </div>
+
+            <div class="recent-activity">
+                <h3>Последняя активность</h3>
+                <ul id="activity-list">
+                    <li>Пользователь admin_user вошел в систему</li>
+                    <li>Пользователь regular_user создал новый пост</li>
+                    <li>Пользователь moderator_user обновил категорию</li>
+                    <li>Пользователь admin_user создал новый реферал</li>
+                    <li>Пользователь regular_user отправил сообщение</li>
+                </ul>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

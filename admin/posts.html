@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление постами - MySite2</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <h1>Панель управления MySite2</h1>
+            <nav class="admin-nav">
+                <a href="/admin/dashboard">Главная</a>
+                <a href="/admin/users">Пользователи</a>
+                <a href="/admin/posts" class="active">Посты</a>
+                <a href="/admin/categories">Категории</a>
+                <a href="/admin/messages">Сообщения</a>
+                <a href="/admin/referrals">Рефералы</a>
+                <a href="/admin/logs">Логи</a>
+            </nav>
+        </header>
+
+        <main class="admin-main">
+            <h2>Управление постами</h2>
+            
+            <div class="admin-filters">
+                <input type="text" id="search-posts" placeholder="Поиск постов...">
+                <select id="category-filter">
+                    <option value="">Все категории</option>
+                    <option value="tech">Технологии</option>
+                    <option value="news">Новости</option>
+                    <option value="culture">Культура</option>
+                </select>
+                <select id="status-filter">
+                    <option value="">Все статусы</option>
+                    <option value="published">Опубликован</option>
+                    <option value="draft">Черновик</option>
+                    <option value="archived">Архив</option>
+                </select>
+                <button onclick="filterPosts()">Фильтровать</button>
+            </div>
+
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Заголовок</th>
+                            <th>Автор</th>
+                            <th>Категория</th>
+                            <th>Статус</th>
+                            <th>Дата публикации</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="posts-table-body">
+                        <!-- Данные будут добавлены через JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="admin-pagination">
+                <button>Предыдущая</button>
+        </main>
+
+        <script>
+            // Пример данных для демонстрации
+            const samplePosts = [
+                { id: 1, title: 'Новый релиз JavaScript', author: 'admin_user', category: 'tech', status: 'published', publishDate: '2023-05-15' },
+                { id: 2, title: 'Международная конференция', author: 'moderator_user', category: 'news', status: 'published', publishDate: '2023-05-10' },
+                { id: 3, title: 'Культурные традиции', author: 'regular_user', category: 'culture', status: 'draft', publishDate: '2023-05-01' },
+                { id: 4, title: 'Технологии будущего', author: 'admin_user', category: 'tech', status: 'published', publishDate: '2023-04-28' }
+            ];
+
+            function loadPosts() {
+                const tableBody = document.getElementById('posts-table-body');
+                tableBody.innerHTML = '';
+                
+                samplePosts.forEach(post => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${post.id}</td>
+                        <td>${post.title}</td>
+                        <td>${post.author}</td>
+                        <td>${getCategoryBadge(post.category)}</td>
+                        <td>${getStatusBadge(post.status)}</td>
+                        <td>${post.publishDate}</td>
+                        <td>
+                            <button onclick="editPost(${post.id})">Редактировать</button>
+                            <button onclick="deletePost(${post.id})">Удалить</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            function getCategoryBadge(category) {
+                let badgeClass, categoryText;
+                switch(category) {
+                    case 'tech':
+                        badgeClass = 'badge-primary';
+                        categoryText = 'Технологии';
+                        break;
+                    case 'news':
+                        badgeClass = 'badge-warning';
+                        categoryText = 'Новости';
+                        break;
+                    case 'culture':
+                        badgeClass = 'badge-info';
+                        categoryText = 'Культура';
+                        break;
+                    default:
+                        badgeClass = '';
+                        categoryText = category;
+                }
+                return `<span class="badge ${badgeClass}">${categoryText}</span>`;
+            }
+
+            function getStatusBadge(status) {
+                let badgeClass, statusText;
+                switch(status) {
+                    case 'published':
+                        badgeClass = 'badge-success';
+                        statusText = 'Опубликован';
+                        break;
+                    case 'draft':
+                        badgeClass = 'badge-secondary';
+                        statusText = 'Черновик';
+                        break;
+                    case 'archived':
+                        badgeClass = 'badge-danger';
+                        statusText = 'Архив';
+                        break;
+                    default:
+                        badgeClass = '';
+                        statusText = status;
+                }
+                return `<span class="badge ${badgeClass}">${statusText}</span>`;
+            }
+
+            function filterPosts() {
+                // Логика фильтрации будет реализована в будущем
+                alert('Фильтрация постов');
+            }
+
+            function editPost(id) {
+                alert(`Редактирование поста с ID: ${id}`);
+            }
+
+            function deletePost(id) {
+                if (confirm('Вы уверены, что хотите удалить этот пост?')) {
+                    alert(`Пост с ID: ${id} удален`);
+                }
+            }
+
+            // Загрузка данных при загрузке страницы
+            window.onload = loadPosts;
+        </script>
+</body>
+</html>
+                <span>1 / 1</span>
+                <button>Следующая</button>
+            </div>
+        </main>
