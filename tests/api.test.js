@@ -1,33 +1,19 @@
 const request = require('supertest');
-const express = require('express');
+const app = require('../src/server');
 
-// Создаем простое приложение для тестирования
-const app = express();
-app.use(express.json());
+// Создаем уникальный порт для тестов
+const TEST_PORT = 3002;
 
-// Имитируем маршруты
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Welcome to MySite2 API',
-    version: '1.0.0',
-    status: 'running'
-  });
-});
-
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'healthy',
-    timestamp: new Date().toISOString()
-  });
-});
-
-app.use('*', (req, res) => {
-  res.status(404).json({
-    error: 'Route not found'
-  });
+// Запускаем тестовый сервер на другом порту
+const server = app.listen(TEST_PORT, () => {
+  console.log(`Test server running on port ${TEST_PORT}`);
 });
 
 describe('API Tests', () => {
+  afterAll((done) => {
+    server.close(done);
+  });
+
   test('should return welcome message on root route', async () => {
     const response = await request(app).get('/');
     expect(response.status).toBe(200);
@@ -43,5 +29,21 @@ describe('API Tests', () => {
   test('should return 404 for non-existent route', async () => {
     const response = await request(app).get('/non-existent');
     expect(response.status).toBe(404);
+  });
+
+  // Тесты для основных маршрутов
+  test('should get users list', async () => {
+    const response = await request(app).get('/users');
+    expect(response.status).toBe(200);
+  });
+
+  test('should get posts list', async () => {
+    const response = await request(app).get('/posts');
+    expect(response.status).toBe(200);
+  });
+
+  test('should get categories list', async () => {
+    const response = await request(app).get('/categories');
+    expect(response.status).toBe(200);
   });
 });

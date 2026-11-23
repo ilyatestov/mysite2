@@ -1,29 +1,40 @@
 const express = require('express');
 const router = express.Router();
 const { getAllReferrals, getReferralById, createReferral, updateReferral, deleteReferral, getReferralsByUser, getReferralByCode, activateReferral } = require('../controllers/referralController');
+const { validateReferral } = require('../middleware/validation');
+const { authorize, isOwner } = require('../middleware/authorization');
 
-// GET /referrals - получить все рефералы
-router.get('/', getAllReferrals);
+// GET /referrals - получить все рефералы (только для администраторов)
+router.get('/', authorize(['admin']), getAllReferrals);
 
-// GET /referrals/:id - получить реферала по ID
-router.get('/:id', getReferralById);
+// GET /referrals/:id - получить реферала по ID (только для владельца или администратора)
+router.get('/:id', authorize(['user', 'moderator', 'admin']), isOwner(), getReferralById);
 
-// POST /referrals - создать новый реферал
-router.post('/', createReferral);
+// POST /referrals - создать новый реферал (только для авторизованных пользователей)
+router.post('/', authorize(['user', 'moderator', 'admin']), validateReferral, createReferral);
 
-// PUT /referrals/:id - обновить реферал
-router.put('/:id', updateReferral);
+// PUT /referrals/:id - обновить реферал (только для владельца или администратора)
+router.put('/:id', 
+  authorize(['user', 'moderator', 'admin']), 
+  isOwner(), 
+  validateReferral, 
+  updateReferral
+);
 
-// DELETE /referrals/:id - удалить реферал
-router.delete('/:id', deleteReferral);
+// DELETE /referrals/:id - удалить реферал (только для владельца или администратора)
+router.delete('/:id', 
+  authorize(['user', 'moderator', 'admin']), 
+  isOwner(), 
+  deleteReferral
+);
 
-// GET /referrals/user/:userId - получить рефералы пользователя
-router.get('/user/:userId', getReferralsByUser);
+// GET /referrals/user/:userId - получить рефералы пользователя (только для владельца или администратора)
+router.get('/user/:userId', authorize(['user', 'moderator', 'admin']), isOwner(), getReferralsByUser);
 
-// GET /referrals/code/:code - получить реферала по коду
+// GET /referrals/code/:code - получить реферала по коду (публичный маршрут)
 router.get('/code/:code', getReferralByCode);
 
-// PUT /referrals/:id/activate - активировать реферал
-router.put('/:id/activate', activateReferral);
+// PUT /referrals/:id/activate - активировать реферал (только для владельца или администратора)
+router.put('/:id/activate', authorize(['user', 'moderator', 'admin']), isOwner(), activateReferral);
 
 module.exports = router;

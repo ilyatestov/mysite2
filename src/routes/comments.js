@@ -1,23 +1,34 @@
 const express = require('express');
 const router = express.Router();
 const { getAllComments, getCommentById, createComment, updateComment, deleteComment, getCommentsByPost } = require('../controllers/commentController');
+const { validateComment } = require('../middleware/validation');
+const { authorize, isOwner } = require('../middleware/authorization');
 
-// GET /comments - получить все комментарии
-router.get('/', getAllComments);
+// GET /comments - получить все комментарии (только для администраторов)
+router.get('/', authorize(['admin']), getAllComments);
 
-// GET /comments/:id - получить комментарий по ID
-router.get('/:id', getCommentById);
+// GET /comments/:id - получить комментарий по ID (только для владельца или администратора)
+router.get('/:id', authorize(['user', 'moderator', 'admin']), isOwner(), getCommentById);
 
-// POST /comments - создать новый комментарий
-router.post('/', createComment);
+// POST /comments - создать новый комментарий (только для авторизованных пользователей)
+router.post('/', authorize(['user', 'moderator', 'admin']), validateComment, createComment);
 
-// PUT /comments/:id - обновить комментарий
-router.put('/:id', updateComment);
+// PUT /comments/:id - обновить комментарий (только для владельца или администратора)
+router.put('/:id', 
+  authorize(['user', 'moderator', 'admin']), 
+  isOwner(), 
+  validateComment, 
+  updateComment
+);
 
-// DELETE /comments/:id - удалить комментарий
-router.delete('/:id', deleteComment);
+// DELETE /comments/:id - удалить комментарий (только для владельца или администратора)
+router.delete('/:id', 
+  authorize(['user', 'moderator', 'admin']), 
+  isOwner(), 
+  deleteComment
+);
 
-// GET /posts/:postId/comments - получить комментарии к посту
+// GET /posts/:postId/comments - получить комментарии к посту (публичный маршрут)
 router.get('/post/:postId', getCommentsByPost);
 
 module.exports = router;
