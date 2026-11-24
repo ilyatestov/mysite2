@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const sequelize = require('../config/db');
 
 // POST /auth/login - вход пользователя
 const login = async (req, res) => {
@@ -43,6 +44,7 @@ const login = async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ error: 'Failed to login' });
   }
 };
@@ -89,6 +91,7 @@ const register = async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Registration error:', error);
     res.status(400).json({ error: 'Failed to register', details: error.message });
   }
 };
@@ -96,8 +99,10 @@ const register = async (req, res) => {
 // GET /auth/profile - получить профиль пользователя
 const getProfile = async (req, res) => {
   try {
+    console.log('Getting profile for user ID:', req.user.id);
     const user = await User.findByPk(req.user.id);
     if (!user) {
+      console.log('User not found for ID:', req.user.id);
       return res.status(404).json({ error: 'User not found' });
     }
     
@@ -111,6 +116,7 @@ const getProfile = async (req, res) => {
       bio: user.bio
     });
   } catch (error) {
+    console.error('Profile fetch error:', error);
     res.status(500).json({ error: 'Failed to fetch profile' });
   }
 };
@@ -118,11 +124,6 @@ const getProfile = async (req, res) => {
 // PUT /auth/profile - обновить профиль пользователя
 const updateProfile = async (req, res) => {
   try {
-    const user = await User.findByPk(req.user.id);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    
     // Обновить только разрешенные поля
     const allowedFields = ['firstName', 'lastName', 'bio'];
     const updateData = {};
@@ -133,9 +134,15 @@ const updateProfile = async (req, res) => {
       }
     }
     
+    const user = await User.findByPk(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
     await user.update(updateData);
     res.json(user);
   } catch (error) {
+    console.error('Profile update error:', error);
     res.status(400).json({ error: 'Failed to update profile', details: error.message });
   }
 };

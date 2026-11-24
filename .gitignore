@@ -7,3 +7,7 @@ node_modules/
 coverage/
 dist/
 build/
+data/*.sqlite
+data/*.sqlite-journal
+data/users.json
+admin/*_backup.html

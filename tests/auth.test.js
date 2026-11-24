@@ -1,23 +1,11 @@
 const request = require('supertest');
-const app = require('../src/server');
-
-// Создаем уникальный порт для тестов
-const TEST_PORT = 3001;
-
-// Запускаем тестовый сервер на другом порту
-const server = app.listen(TEST_PORT, () => {
-  console.log(`Test server running on port ${TEST_PORT}`);
-});
+const app = require('./test-server');
 
 describe('Auth API Tests', () => {
-  afterAll((done) => {
-    server.close(done);
-  });
-
   test('should register a new user', async () => {
     const newUser = {
-      username: 'testuser',
-      email: 'test@example.com',
+      username: 'testuser' + Date.now(),
+      email: 'test' + Date.now() + '@example.com',
       password: 'password123'
     };
     
@@ -31,25 +19,36 @@ describe('Auth API Tests', () => {
   });
 
   test('should login existing user', async () => {
-    const loginData = {
-      email: 'test@example.com',
-      password: 'password123'
-    };
+    const email = 'test' + Date.now() + '@example.com';
+    const password = 'password123';
     
+    // Сначала зарегистрируем пользователя
+    const registerResponse = await request(app)
+      .post('/auth/register')
+      .send({
+        username: 'loginuser' + Date.now(),
+        email,
+        password
+      });
+      
+    // Теперь залогинимся
     const response = await request(app)
       .post('/auth/login')
-      .send(loginData)
+      .send({
+        email,
+        password
+      })
       .expect(200);
       
     expect(response.body.token).toBeDefined();
-    expect(response.body.user.email).toBe(loginData.email);
+    expect(response.body.user.email).toBe(email);
   });
 
   test('should get user profile', async () => {
     // Сначала зарегистрируем пользователя
     const newUser = {
-      username: 'profileuser',
-      email: 'profile@example.com',
+      username: 'profileuser' + Date.now(),
+      email: 'profile' + Date.now() + '@example.com',
       password: 'password123'
     };
     

@@ -12,7 +12,7 @@ const modelFiles = fs.readdirSync(__dirname)
 
 modelFiles.forEach(file => {
   const modelName = path.basename(file, '.js');
-  const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
+  const model = require(path.join(__dirname, file));
   models[modelName] = model;
 });
 

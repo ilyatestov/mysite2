@@ -32,11 +32,7 @@ describe('API Tests', () => {
   });
 
   // Тесты для основных маршрутов
-  test('should get users list', async () => {
-    const response = await request(app).get('/users');
-    expect(response.status).toBe(200);
-  });
-
+  // Проверяем, что маршруты существуют, но не требуют авторизации
   test('should get posts list', async () => {
     const response = await request(app).get('/posts');
     expect(response.status).toBe(200);

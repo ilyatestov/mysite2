@@ -1,5 +1,6 @@
 const Comment = require('../models/Comment');
 const User = require('../models/User');
+const Post = require('../models/Post');
 
 // GET /comments - получить все комментарии
 const getAllComments = async (req, res) => {
@@ -39,7 +40,7 @@ const createComment = async (req, res) => {
       return res.status(400).json({ error: 'Author not found' });
     }
     
-    const postExists = await Comment.findByPk(postId);
+    const postExists = await Post.findByPk(postId);
     if (!postExists) {
       return res.status(400).json({ error: 'Post not found' });
     }

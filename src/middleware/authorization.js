@@ -3,7 +3,7 @@
  * @param {Array} roles - Массив разрешенных ролей. Если не указан, проверяет на наличие авторизации
  * @returns {Function} Middleware функция
  */
-export const authorize = (roles = null) => {
+const authorize = (roles = null) => {
   return (req, res, next) => {
     // Проверка наличия пользователя в запросе (должен быть установлен middleware auth)
     if (!req.user) {
@@ -34,98 +34,7 @@ export const authorize = (roles = null) => {
  * Middleware для проверки принадлежности ресурса пользователю
  * @returns {Function} Middleware функция
  */
-export const isOwner = () => {
-  return (req, res, next) => {
-    // Проверка наличия пользователя в запросе
-    if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Необходима авторизация'
-      });
-    }
-
-    // Проверка наличия ID ресурса в параметрах запроса
-    const resourceId = req.params.id;
-    if (!resourceId) {
-      return res.status(400).json({
-        success: false,
-        message: 'ID ресурса не указан'
-      });
-    }
-
-    // Для администраторов всегда разрешен доступ
-    if (req.user.role === 'admin') {
-      return next();
-    }
-
-    // В реальной реализации здесь будет проверка принадлежности ресурса пользователю
-    // Например, проверка в БД, что пользователь является владельцем ресурса
-    // В данном примере просто пропускаем запрос (в реальной системе нужно реализовать проверку)
-    next();
-  };
-};
-
-/**
- * Middleware для проверки конкретных прав доступа
- * @param {string} permission - Название права доступа
- * @returns {Function} Middleware функция
- */
-export const checkPermission = (permission) => {
-  return (req, res, next) => {
-    // Проверка наличия пользователя в запросе
-    if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Необходима авторизация'
-      });
-    }
-
-    // В реальной реализации здесь будет проверка наличия у пользователя конкретного права
-    // Например, проверка в БД или в конфигурации
-    // В данном примере просто пропускаем запрос (в реальной системе нужно реализовать проверку)
-    
-    next();
-  };
-};
-
-/**
- * Middleware для валидации изменений ролей пользователей
- * @returns {Function} Middleware функция
- */
-export const validateRoleChange = () => {
-  return (req, res, next) => {
-    // Проверка наличия пользователя в запросе
-    if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Необходима авторизация'
-      });
-    }
-
-    // Только администраторы могут изменять роли пользователей
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Недостаточно прав для изменения ролей пользователей'
-      });
-    }
-
-    // В реальной реализации здесь будет дополнительная проверка:
-    // - Запрет на изменение собственной роли
-    // - Проверка допустимых ролей для изменения
-    // - Проверка на попытку повысить уровень до администратора
-    
-    next();
-  };
-};
-
-/**
- * Middleware для проверки прав доступа к ресурсу на основе данных из БД
- * @param {Function} model - Модель данных для проверки
- * @param {string} ownerField - Поле в модели, содержащее ID владельца
- * @returns {Function} Middleware функция
- */
-export const checkResourceOwnership = (model, ownerField = 'userId') => {
+const isOwner = (model, ownerField = 'userId') => {
   return async (req, res, next) => {
     // Проверка наличия пользователя в запросе
     if (!req.user) {
@@ -151,15 +60,34 @@ export const checkResourceOwnership = (model, ownerField = 'userId') => {
 
     try {
       // В реальной реализации здесь будет запрос к БД для проверки принадлежности
-      // const resource = await model.findByPk(resourceId);
-      // if (!resource || resource[ownerField] !== req.user.id) {
-      //   return res.status(403).json({
-      //     success: false,
-      //     message: 'Нет доступа к ресурсу'
-      //   });
-      // }
+      const resource = await model.findByPk(resourceId);
+      if (!resource) {
+        return res.status(404).json({
+          success: false,
+          message: 'Ресурс не найден'
+        });
+      }
       
-      // В данном примере просто пропускаем запрос
+      // Проверяем, принадлежит ли ресурс пользователю
+      // Для Referral используем специальную логику для referrerId и referredId
+      if (model.name === 'Referral') {
+        // Для рефералов проверяем оба поля: referrerId и referredId
+        if (resource.referrerId !== req.user.id && resource.referredId !== req.user.id) {
+          return res.status(403).json({
+            success: false,
+            message: 'Нет доступа к ресурсу'
+          });
+        }
+      } else {
+        // Для других моделей используем стандартную проверку
+        if (resource[ownerField] !== req.user.id) {
+          return res.status(403).json({
+            success: false,
+            message: 'Нет доступа к ресурсу'
+          });
+        }
+      }
+      
       next();
     } catch (error) {
       return res.status(500).json({
@@ -169,4 +97,44 @@ export const checkResourceOwnership = (model, ownerField = 'userId') => {
       });
     }
   };
+};
+
+/**
+ * Middleware для валидации изменений ролей пользователей
+ * @returns {Function} Middleware функция
+ */
+const validateRoleChange = () => {
+  return (req, res, next) => {
+    // Проверка наличия пользователя в запросе
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Необходима авторизация'
+      });
+    }
+
+    // Только администраторы могут изменять роли пользователей
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Недостаточно прав для изменения ролей пользователей'
+      });
+    }
+
+    // Проверка, что пользователь не пытается изменить свою собственную роль
+    if (req.params.id && parseInt(req.params.id) === req.user.id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Нельзя изменить собственную роль'
+      });
+    }
+
+    next();
+  };
+};
+
+module.exports = {
+  authorize,
+  isOwner,
+  validateRoleChange
 };

@@ -63,10 +63,7 @@ const updateUser = async (req, res) => {
     // Защита от массового присвоения полей
     const { username, email, firstName, lastName, bio, avatar, isActive } = req.body;
     
-    // Проверка прав доступа - только владелец или админ может обновлять данные
-    if (user.id !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Access denied. Not user owner or admin.' });
-    }
+    // Проверка прав доступа уже выполнена middleware isOwner
     
     // Проверка, что пользователь не может изменить свою роль
     if (req.body.role && req.user.role !== 'admin') {
@@ -101,10 +98,7 @@ const deleteUser = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
     
-    // Проверка прав доступа - только владелец или админ может удалять
-    if (user.id !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Access denied. Not user owner or admin.' });
-    }
+    // Проверка прав доступа уже выполнена middleware isOwner
     
     await user.destroy();
     res.json({ message: 'User deleted successfully' });

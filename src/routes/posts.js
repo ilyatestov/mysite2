@@ -3,6 +3,7 @@ const router = express.Router();
 const { getAllPosts, getPostById, createPost, updatePost, deletePost } = require('../controllers/postController');
 const { validatePost } = require('../middleware/validation');
 const { authorize, isOwner } = require('../middleware/authorization');
+const Post = require('../models/Post');
 
 // GET /posts - получить все посты (публичный маршрут)
 router.get('/', getAllPosts);
@@ -16,7 +17,7 @@ router.post('/', authorize(['user', 'moderator', 'admin']), validatePost, create
 // PUT /posts/:id - обновить пост (только владелец или администратор)
 router.put('/:id', 
   authorize(['user', 'moderator', 'admin']), 
-  isOwner(), 
+  isOwner(Post), 
   validatePost, 
   updatePost
 );
@@ -24,7 +25,7 @@ router.put('/:id',
 // DELETE /posts/:id - удалить пост (только владелец или администратор)
 router.delete('/:id', 
   authorize(['user', 'moderator', 'admin']), 
-  isOwner(), 
+  isOwner(Post), 
   deletePost
 );
 

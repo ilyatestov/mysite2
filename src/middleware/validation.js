@@ -94,11 +94,36 @@ const validateMessage = (req, res, next) => {
   next();
 };
 
+const validateReferral = (req, res, next) => {
+  const { referrerId, referredId, referralCode } = req.body;
+  
+  if (!referrerId || !referredId) {
+    return res.status(400).json({
+      error: 'ReferrerId and referredId are required'
+    });
+  }
+  
+  if (referrerId === referredId) {
+    return res.status(400).json({
+      error: 'Referrer and referred cannot be the same user'
+    });
+  }
+  
+  if (referralCode && referralCode.length < 6) {
+    return res.status(400).json({
+      error: 'Referral code must be at least 6 characters'
+    });
+  }
+  
+  next();
+};
+
 module.exports = {
   validateUser,
   validatePost,
   validateCategory,
   validateTag,
   validateComment,
-  validateMessage
+  validateMessage,
+  validateReferral
 };

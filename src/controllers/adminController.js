@@ -1,5 +1,10 @@
 const AdminLog = require('../models/AdminLog');
 const User = require('../models/User');
+const Post = require('../models/Post');
+const Comment = require('../models/Comment');
+const Message = require('../models/Message');
+const Referral = require('../models/Referral');
+const sequelize = require('../config/db');
 
 // GET /admin/logs - получить все административные логи
 const getAllAdminLogs = async (req, res) => {
