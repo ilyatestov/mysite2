@@ -1,19 +1,31 @@
 // Настройка тестовой среды
-const { Sequelize } = require('sequelize');
-const fs = require('fs');
-const path = require('path');
+// Импортируем только нужные модули здесь, чтобы избежать проблем с импортом до установки NODE_ENV
+const { testSequelize } = require('./test-db');
 
-// Создаем временную базу данных для тестов
-const testDbPath = path.join(__dirname, 'test-database.sqlite');
+// Экспортируем функцию для инициализации тестов
+async function setupTestDatabase() {
+  try {
+    await testSequelize.authenticate();
+    console.log('Test database connection has been established successfully.');
+    
+    // Синхронизируем модели с тестовой базой данных
+    await testSequelize.sync({ force: true });
+    console.log('Test database synchronized successfully.');
+    
+    return testSequelize;
+  } catch (error) {
+    console.error('Unable to connect to the test database:', error);
+    throw error;
+  }
+}
 
-// Создаем тестовую конфигурацию базы данных
-const testSequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: testDbPath,
-  logging: false
-});
+// Экспортируем cleanup функцию
+async function cleanupTestDatabase() {
+  await testSequelize.close();
+  console.log('Test database connection closed.');
+}
 
 module.exports = {
-  testSequelize,
-  testDbPath
+  setupTestDatabase,
+  cleanupTestDatabase
 };

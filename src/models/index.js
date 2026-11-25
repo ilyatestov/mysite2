@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const { Sequelize } = require('sequelize');
+
+// Импорт конфигурации базы данных для получения правильного экземпляра
 const sequelize = require('../config/db');
 
 // Импорт всех моделей
@@ -10,6 +12,7 @@ const models = {};
 const modelFiles = fs.readdirSync(__dirname)
   .filter(file => file !== 'index.js' && file.endsWith('.js'));
 
+// Импортируем модели
 modelFiles.forEach(file => {
   const modelName = path.basename(file, '.js');
   const model = require(path.join(__dirname, file));
@@ -23,6 +26,8 @@ Object.keys(models).forEach(modelName => {
   }
 });
 
+// Экспортируем sequelize экземпляр для всех моделей
+// Используем один экземпляр для всех моделей
 models.sequelize = sequelize;
 models.Sequelize = Sequelize;
 
