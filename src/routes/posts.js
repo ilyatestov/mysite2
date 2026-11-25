@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getAllPosts, getPostById, createPost, updatePost, deletePost } = require('../controllers/postController');
 const { validatePost } = require('../middleware/validation');
-const { authorize, isOwner } = require('../middleware/authorization');
+const { authenticate, authorize, isOwner } = require('../middleware/auth');
 const Post = require('../models/Post');
 
 // GET /posts - получить все посты (публичный маршрут)
@@ -12,10 +12,11 @@ router.get('/', getAllPosts);
 router.get('/:id', getPostById);
 
 // POST /posts - создать новый пост (только для авторизованных пользователей)
-router.post('/', authorize(['user', 'moderator', 'admin']), validatePost, createPost);
+router.post('/', authenticate, authorize(['user', 'moderator', 'admin']), validatePost, createPost);
 
 // PUT /posts/:id - обновить пост (только владелец или администратор)
 router.put('/:id', 
+  authenticate,
   authorize(['user', 'moderator', 'admin']), 
   isOwner(Post), 
   validatePost, 
@@ -24,6 +25,7 @@ router.put('/:id',
 
 // DELETE /posts/:id - удалить пост (только владелец или администратор)
 router.delete('/:id', 
+  authenticate,
   authorize(['user', 'moderator', 'admin']), 
   isOwner(Post), 
   deletePost

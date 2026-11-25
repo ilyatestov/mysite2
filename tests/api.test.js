@@ -1,19 +1,10 @@
 const request = require('supertest');
 const app = require('../src/server');
 
-// Создаем уникальный порт для тестов
-const TEST_PORT = 3002;
-
-// Запускаем тестовый сервер на другом порту
-const server = app.listen(TEST_PORT, () => {
-  console.log(`Test server running on port ${TEST_PORT}`);
-});
+// Убираем фиксированный порт - используем supertest напрямую
+// supertest позволяет тестировать Express app без самостоятельного app.listen()
 
 describe('API Tests', () => {
-  afterAll((done) => {
-    server.close(done);
-  });
-
   test('should return welcome message on root route', async () => {
     const response = await request(app).get('/');
     expect(response.status).toBe(200);

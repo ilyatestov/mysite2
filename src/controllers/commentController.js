@@ -28,24 +28,40 @@ const getCommentById = async (req, res) => {
 // POST /comments - создать новый комментарий
 const createComment = async (req, res) => {
   try {
-    const { content, authorId, postId } = req.body;
+    // Защита от массового присвоения полей
+    const { content, postId } = req.body;
     
-    if (!content || !authorId || !postId) {
-      return res.status(400).json({ error: 'Content, authorId and postId are required' });
+    if (!content || !postId) {
+      return res.status(400).json({ error: 'Content and postId are required' });
     }
     
-    // Проверка существования автора и поста
-    const userExists = await User.findByPk(authorId);
-    if (!userExists) {
-      return res.status(400).json({ error: 'Author not found' });
-    }
-    
+    // Проверка существования поста
     const postExists = await Post.findByPk(postId);
     if (!postExists) {
       return res.status(400).json({ error: 'Post not found' });
     }
     
-    const comment = await Comment.create(req.body);
+    // Проверка, что authorId устанавливается сервером
+    if (req.body.authorId) {
+      return res.status(400).json({ 
+        error: 'Cannot set authorId directly. It will be set by the server.' 
+      });
+    }
+    
+    // Проверка, что isApproved не устанавливается при создании
+    if (req.body.isApproved !== undefined) {
+      return res.status(400).json({ 
+        error: 'Cannot set isApproved directly. It will be set by moderators.' 
+      });
+    }
+    
+    const comment = await Comment.create({
+      content,
+      postId,
+      authorId: req.user.id, // Устанавливаем автора из токена
+      isApproved: false // Комментарии по умолчанию не одобрены
+    });
+    
     res.status(201).json(comment);
   } catch (error) {
     res.status(400).json({ error: 'Failed to create comment', details: error.message });
@@ -65,7 +81,30 @@ const updateComment = async (req, res) => {
       return res.status(403).json({ error: 'Access denied. Not comment author or admin.' });
     }
     
-    await comment.update(req.body);
+    // Защита от массового присвоения полей
+    const { content, isApproved } = req.body;
+    
+    // Проверка, что authorId не меняется
+    if (req.body.authorId) {
+      return res.status(400).json({ 
+        error: 'Cannot change authorId. It is managed by the system.' 
+      });
+    }
+    
+    // Проверка, что isApproved меняется только модераторами
+    if (isApproved !== undefined && req.user.role !== 'moderator' && req.user.role !== 'admin') {
+      return res.status(403).json({ 
+        error: 'Access denied. Only moderators and admins can change isApproved.' 
+      });
+    }
+    
+    const updateData = {};
+    
+    // Разрешенные поля для обновления
+    if (content !== undefined) updateData.content = content;
+    if (isApproved !== undefined) updateData.isApproved = isApproved;
+    
+    await comment.update(updateData);
     res.json(comment);
   } catch (error) {
     res.status(400).json({ error: 'Failed to update comment', details: error.message });

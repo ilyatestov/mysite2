@@ -11,6 +11,10 @@ beforeAll(async () => {
     // Синхронизируем модели с тестовой базой данных
     await testSequelize.sync({ force: true });
     console.log('Test database synchronized successfully.');
+    
+    // Обновляем sequelize для всех моделей, чтобы они использовали тестовую базу
+    // Проблема была в том, что модели уже импортированы и связаны с исходным экземпляром
+    // Поэтому мы должны обновить их через рефлексию или другой подход
   } catch (error) {
     console.error('Unable to connect to the test database:', error);
     throw error;

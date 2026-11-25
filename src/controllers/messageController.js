@@ -65,10 +65,11 @@ const getMessageById = async (req, res) => {
 // POST /messages - создать новое сообщение
 const createMessage = async (req, res) => {
   try {
-    const { senderId, receiverId, content } = req.body;
+    // Защита от массового присвоения полей
+    const { receiverId, content } = req.body;
     
     // Проверка прав доступа - только отправитель может создавать сообщения
-    if (senderId !== req.user.id && req.user.role !== 'admin') {
+    if (req.body.senderId !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Access denied. Not message sender.' });
     }
     
@@ -78,10 +79,26 @@ const createMessage = async (req, res) => {
       return res.status(400).json({ error: 'Receiver not found' });
     }
     
+    // Проверка, что isRead не устанавливается при создании
+    if (req.body.isRead !== undefined) {
+      return res.status(400).json({ 
+        error: 'Cannot set isRead directly. It will be set by the system.' 
+      });
+    }
+    
+    // Проверка, что isDeleted не устанавливается при создании
+    if (req.body.isDeleted !== undefined) {
+      return res.status(400).json({ 
+        error: 'Cannot set isDeleted directly. It will be managed by the system.' 
+      });
+    }
+    
     const message = await Message.create({
-      senderId,
+      senderId: req.user.id, // Устанавливаем отправителя из токена
       receiverId,
-      content
+      content,
+      isRead: false, // Сообщения по умолчанию не прочитаны
+      isDeleted: false // Сообщения по умолчанию не удалены
     });
     
     res.status(201).json(message);
@@ -105,6 +122,28 @@ const updateMessage = async (req, res) => {
     
     // Защита от массового присвоения полей
     const { content, isRead } = req.body;
+    
+    // Проверка, что senderId не меняется
+    if (req.body.senderId) {
+      return res.status(400).json({ 
+        error: 'Cannot change senderId. It is managed by the system.' 
+      });
+    }
+    
+    // Проверка, что receiverId не меняется
+    if (req.body.receiverId) {
+      return res.status(400).json({ 
+        error: 'Cannot change receiverId. It is managed by the system.' 
+      });
+    }
+    
+    // Проверка, что isDeleted не меняется через обновление
+    if (req.body.isDeleted !== undefined) {
+      return res.status(400).json({ 
+        error: 'Cannot change isDeleted directly. Use delete operation instead.' 
+      });
+    }
+    
     const updateData = {};
     
     if (content !== undefined) updateData.content = content;

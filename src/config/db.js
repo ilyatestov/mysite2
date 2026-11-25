@@ -1,10 +1,11 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-// Для development используем SQLite
+// Создаем экземпляр Sequelize с разной конфигурацией в зависимости от среды
 const sequelize = new Sequelize({
   dialect: 'sqlite',
-  storage: './data/database.sqlite',
+  // Используем in-memory базу для тестов, файловую для development
+  storage: process.env.NODE_ENV === 'test' ? ':memory:' : './data/database.sqlite',
   logging: false // Установите true для логирования SQL запросов
 });
 
