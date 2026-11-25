@@ -3,7 +3,8 @@ const path = require('path');
 const { Sequelize } = require('sequelize');
 
 // Импорт конфигурации базы данных для получения правильного экземпляра
-const sequelize = require('../config/db');
+const getSequelizeInstance = require('../config/db');
+const sequelize = getSequelizeInstance();
 
 // Импорт всех моделей
 const models = {};

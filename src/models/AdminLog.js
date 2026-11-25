@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
+const getSequelizeInstance = require('../config/db');
+const sequelize = getSequelizeInstance();
 
 const AdminLog = sequelize.define('AdminLog', {
   id: {
