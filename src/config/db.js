@@ -1,23 +1,32 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-// Создаем единый экземпляр Sequelize с разной конфигурацией в зависимости от среды
-let sequelizeInstance = null;
+// Для тестов создаем отдельный экземпляр, чтобы избежать кэширования
+let testSequelizeInstance = null;
+let devSequelizeInstance = null;
 
 function getSequelizeInstance() {
-  if (sequelizeInstance) {
-    return sequelizeInstance;
+  // В зависимости от среды возвращаем соответствующий экземпляр
+  if (process.env.NODE_ENV === 'test') {
+    if (!testSequelizeInstance) {
+      testSequelizeInstance = new Sequelize({
+        dialect: 'sqlite',
+        storage: ':memory:',
+        logging: false
+      });
+    }
+    return testSequelizeInstance;
+  } else {
+    if (!devSequelizeInstance) {
+      devSequelizeInstance = new Sequelize({
+        dialect: 'sqlite',
+        storage: './data/database.sqlite',
+        logging: false
+      });
+    }
+    return devSequelizeInstance;
   }
-  
-  sequelizeInstance = new Sequelize({
-    dialect: 'sqlite',
-    // Используем in-memory базу для тестов, файловую для development
-    storage: process.env.NODE_ENV === 'test' ? ':memory:' : './data/database.sqlite',
-    logging: false // Установите true для логирования SQL запросов
-  });
-  
-  return sequelizeInstance;
 }
 
-// Экспортируем функцию для получения экземпляра, чтобы избежать кэширования
+// Экспортируем функцию для получения экземпляра
 module.exports = getSequelizeInstance;

@@ -9,7 +9,7 @@ const { checkSecurityConfig } = require('./config/security');
 checkSecurityConfig();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(helmet());
@@ -44,6 +44,7 @@ const commentsRouter = require('./routes/comments');
 const messagesRouter = require('./routes/messages');
 const referralsRouter = require('./routes/referrals');
 const adminLogsRouter = require('./routes/adminLogs');
+const adminRouter = require('./routes/admin');
 const authRouter = require('./routes/auth');
 
 app.use('/users', usersRouter);
@@ -54,6 +55,7 @@ app.use('/comments', commentsRouter);
 app.use('/messages', messagesRouter);
 app.use('/referrals', referralsRouter);
 app.use('/admin-logs', adminLogsRouter);
+app.use('/admin', adminRouter);
 app.use('/auth', authRouter);
 
 // Error handling middleware
